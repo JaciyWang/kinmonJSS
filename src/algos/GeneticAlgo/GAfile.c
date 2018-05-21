@@ -207,16 +207,17 @@ GAState* ga_load_from_file(FILE* fp) {
  * @param fp 文件指针
  * @return true 成功
  */
-bool ga_write_to_file(const GAState* data, FILE* fp) {
+void ga_write_to_file(const GAState* data, FILE* fp) {
 	int i;
 	int max_time = 0;
-    int** process_location = calloc(sizeof(int), data->m);
+	int** process_location = malloc(sizeof(int)* data->n);
+	int j;
+	for (j = 0; j < data->n; j++)
+		process_location[j] = calloc(sizeof(int), 2);
 	for (i = 1; i <= data->m; i++) {
 		/// NO.i machine
-		int j;
-        memset(process_location, 0, sizeof process_location);
-		for (j = 0; j < data->m; j++)
-			process_location[j] = calloc(sizeof(int), 2);
+		for (j = 0; j < data->n; j++)
+			memset(process_location[j], 0, sizeof(process_location[0]));
 		int process_num = 0;
 		for (j = 0; j < data->n; j++) {
 			///in j row k col ,totally n row m col
@@ -230,27 +231,25 @@ bool ga_write_to_file(const GAState* data, FILE* fp) {
 				}
 		}
 		ga_sort(process_location, data, process_num);
-		printf("M%d", i);
+		fprintf(fp,"M%d", i);
 		for (j = 0; j < process_num; j++) {
 			int row = process_location[j][0];
 			int col = process_location[j][1];
-			int start_time = data->S[row * data->m + col];
-			int end_time = start_time + data->T[row * data->m + col];
+			int current_position = ga_get_position(row, col, data);
+			int start_time = data->S[current_position];
+			int end_time = start_time + data->T[current_position];
 			if (end_time > max_time) max_time = end_time;
-			printf(" (%d,%d-%d,%d)",
-			       start_time,
-			       row + 1,
-			       col + 1,
-			       end_time
+			fprintf(fp," (%d,%d-%d,%d)",
+				start_time,
+				row + 1,
+				col + 1,
+				end_time
 			);
-			putchar('\n');
-			for (j = 0; j < data->m; j++)
-				free(process_location[j]);
-
 		}
+		fputc('\n',fp);
 	}
-    free(process_location);
-	printf("END %d", max_time);
+	//free(process_location);
+	fprintf(fp,"END %d", max_time);
 }
 
 /**

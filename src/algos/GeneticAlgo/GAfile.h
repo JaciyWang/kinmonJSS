@@ -7,6 +7,7 @@
 #pragma once
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 /**
  * @brief 源数据
  *
@@ -40,7 +41,7 @@ typedef struct {
 
 GAState* ga_load_from_file(FILE* fp);
 
-bool ga_write_to_file(const GAState* data, FILE* fp);
+void ga_write_to_file(const GAState* data, FILE* fp);
 
 void ga_sort(int* a[2], const GAState* data, int process_num);
 

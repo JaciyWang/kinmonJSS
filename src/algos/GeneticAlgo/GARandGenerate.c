@@ -9,9 +9,9 @@
 /**
  * 生成小数时处以的倍数
  */
-#define DIVIDE_TIMES 1000
+#define DIVIDE_TIMES 100
 ///随机加入的三个非零数
-static unsigned long x =2412, y=2134123 , z =123412343;
+static unsigned long x =241312, y=213423 , z =12412343;
 /**
  * 得到一个随机整数
  */
