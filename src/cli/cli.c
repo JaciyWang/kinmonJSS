@@ -15,7 +15,7 @@
  * @brief 输出所有在可插拔算法数组中注册的算法名称
  */
 static void print_available_algos(){
-    for(int i = 0;i<kinmon_algos_count;i++) printf("%s ",((JSSAlgo* )(kinmon_algos+i))->name);
+    for(int i = 0;i<kinmon_algos_count;i++) printf("%s ",((JSSAlgo* )*(&kinmon_algos+i))->name);
 }
 /**
  * @brief 输出帮助

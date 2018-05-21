@@ -36,13 +36,13 @@
  *  作者
  *  TODO:放上英文ID，中文会乱码
  */
-#define KINMON_AUTHORS "heymind , & "
+#define KINMON_AUTHORS "heymind , Nihileon & "
 
 /**
  *  可插拔算法注册数组
  */
 extern JSSAlgo** kinmon_algos;
-#define kinmon_algos_count  (1)
+#define kinmon_algos_count  (2)
 
 
 

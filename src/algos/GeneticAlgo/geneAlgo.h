@@ -7,6 +7,7 @@
 #pragma once
 #include "GAfile.h"
 #include "GARandGenerate.h"
+#include "../algo.h"
 #include <string.h>
 #include <stdint.h>
 #define MAX_JOB 105
@@ -42,4 +43,5 @@ typedef struct
      */
     int current_chromo_num;
 }Population;
+
 extern JSSAlgo gene_algo;

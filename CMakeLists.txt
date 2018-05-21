@@ -11,7 +11,9 @@ add_executable(basic
         src/algos/bigant/bigant.c
         src/config.c
         src/entries/console.c
-        src/GeneticAlgo/geneAlgo.c
+        src/algos/GeneticAlgo/geneAlgo.c
+        src/algos/GeneticAlgo/GAfile.c
+        src/algos/GeneticAlgo/GARandGenerate.c
         )
 target_compile_definitions(basic PUBLIC LOG_LEVEL_INFO=1)
 

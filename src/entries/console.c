@@ -17,6 +17,7 @@
 
 
 int main(int argc,char **argv){
+
     bool succ = 0;
     CLIParseResult params;
     if(!cli_parse(&params,argc,argv)){
