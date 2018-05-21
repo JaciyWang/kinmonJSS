@@ -66,7 +66,7 @@ bool cli_parse(CLIParseResult *result,int argc,char** argv){
         } else if(strcmp(argv[i],"--algo") == 0){
             char *algo_name = argv[++i];
             for(int j = 0;j<kinmon_algos_count;j++){
-                if(strcmp(kinmon_algos[j]->name,algo_name)==0) {
+                if(strcmp(((JSSAlgo* )*(&kinmon_algos+j))->name,algo_name)==0) {
                     result->use_algo = j;
                     i++;
                     continue;
