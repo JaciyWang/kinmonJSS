@@ -7,7 +7,9 @@
 #include "geneAlgo.h"
 #include <time.h>
  //#include "../algo.h"
-
+#include "../../readers/reader.h"
+#include "../gme/gme.h"
+#include "../../readers/dataset2.h"
 #define MAX_MACHINE 25
  ///染色体的最大长度
 #define MAX_LENGTH 1000
@@ -20,13 +22,13 @@
 ///每次的种群扩大倍数
 #define ENLARGE_TIMES 8
 ///变异率
-#define MUTATION_RATE 0.5
+#define MUTATION_RATE 0.1
 ///交叉率
-#define CROSSOVER_RATE 0.5
+#define CROSSOVER_RATE 0.8
 ///迭代次数
-#define CIRCLE_TIME 200
+#define CIRCLE_TIME 20000
 
-
+DecoderThreadingState* dts[5];
 /**
  * @brief Get the position
  *
@@ -130,6 +132,7 @@ static Chromo* mutation(int chromo_length, Chromo* parent) {
  * @param data 源数据
  * @return int 返回时间的最大值
  */
+
 void compute_DAG(Chromo* chromo, GAState* data) {
 	int temp_time[MAX_JOB*MAX_MACHINE] = { 0 };
 	int traveled[MAX_JOB] = { 0 };
@@ -319,11 +322,32 @@ static void find_best_chromo(Population* population_data) {
  * @param population_data 种群数据
  * @param data 源数据
  */
+int decoder_process(DecoderThreadingState* ts,int *gen);
 static void decode(Population* population_data, GAState* data) {
-	int i;
+	static  int x = 1;
+	int i,count = 0,cc[4] = {0},which[1000][1000] = {0};
 	for (i = 0; i < population_data->current_chromo_num; i++)
-		if (population_data->population[i]->time_cost == 0)
-			compute_DAG(population_data->population[i], data);
+		if (population_data->population[i]->time_cost == 0){
+			decoder_thread_set_gen_count(dts[count % 4],cc[count % 4]+1);
+//			decoder_process(dts[4],population_data->population[i]->genes);
+			decoder_thread_set_gen(dts[count % 4],cc[count % 4]++,population_data->population[i]->genes);
+			which[count % 4][cc[count % 4]] = i;
+			count++;
+		}
+	decoder_thread_tick(dts[0]);
+	decoder_thread_tick(dts[1]);
+	decoder_thread_tick(dts[2]);
+	decoder_thread_tick(dts[3]);
+	decoder_thread_wait_finish(dts[0]);
+	decoder_thread_wait_finish(dts[1]);
+	decoder_thread_wait_finish(dts[2]);
+	decoder_thread_wait_finish(dts[3]);
+	for(i=0;i<4;i++) for(int j=0;j<cc[i];j++){
+			population_data->population[which[i][j]]->time_cost = dts[i]->gen_span[j];
+		}
+
+
+
 }
 
 /**
@@ -339,13 +363,16 @@ static void circle_to_find_best(Population* population_data, GAState* data) {
 	find_best_chromo(population_data);
 	lessen_population(population_data);
 	int temp_time = population_data->population[0]->time_cost;
+
 	for (i = 0; i < CIRCLE_TIME; i++) {
 		enlarge_population(population_data, data);
 		decode(population_data, data);
+
 		find_best_chromo(population_data);
 		lessen_population(population_data);
 		temp_time = population_data->population[0]->time_cost;
 	}
+
 	compute_DAG(population_data->population[0], data);
 	printf("%d\n", temp_time);
 }
@@ -459,17 +486,32 @@ static void population_destroy(Population* population_data) {
 static int epoch_once(GAState* data){
 	Population* population_data = init_population(data, NULL);
 	circle_to_find_best(population_data, data);
-	add_time(population_data->population[0], data);
+//	add_time(population_data->population[0], data);
+	decoder_thread_set_gen_count(dts[4],1);
+	decoder_thread_set_gen(dts[4],0,population_data->population[0]->genes);
+
+	decoder_thread_tick(dts[4]);
+	decoder_thread_wait_finish(dts[4]);
 	population_destroy(population_data);
 }
 
-//int main() {
-//	srand(time(NULL));
-//	FILE* fp = fopen("C:\\Users\\Nihil\\Desktop\\jobshopnew\\src\\test.in", "r");
-//	GAState* data = ga_load_from_file(fp);
-//	//random_algo(data);
-//	return 0;
-//}
+int main() {
+	srand(time(NULL));
+	FILE* fp = fopen("in.txt", "r");
+	GAState* data = ga_load_from_file(fp);
+	JSSInput input;
+	fseek(fp,SEEK_SET,0);
+	jss_read_dataset2(&input,fp);
+	init_population(data,NULL);
+	dts[0] = decoder_create_thread(&input,0);
+	dts[1] = decoder_create_thread(&input,0);
+	dts[2] = decoder_create_thread(&input,0);
+	dts[3] = decoder_create_thread(&input,0);
+	dts[4] = decoder_create_thread(&input,true);
+	epoch_once(data);
+//	random_algo(data);
+	return 0;
+}
 
 JSSAlgo gene_algo = {
 	.name = "gene",

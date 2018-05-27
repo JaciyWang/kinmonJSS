@@ -72,10 +72,9 @@ bool cli_parse(CLIParseResult *result,int argc,char** argv){
                     continue;
                 }
             }
-            printf("ERR:Unknown algo.");
-            return  false;
+
         }else{
-            print_help();
+            printf("ERR:Unknown algo.");
             return  false;
         }
         i++;
